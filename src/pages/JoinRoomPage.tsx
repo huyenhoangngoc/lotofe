@@ -102,6 +102,25 @@ export function JoinRoomPage() {
           </div>
         )}
 
+        {error && !roomInfo && (
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => { setError(null); setChecked(false) }}
+              className="flex-1 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'white' }}
+            >
+              Thử lại
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="flex-1 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
+              style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+            >
+              Nhập mã khác
+            </button>
+          </div>
+        )}
+
         {roomInfo && (
           <div className="mb-4 text-center">
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
