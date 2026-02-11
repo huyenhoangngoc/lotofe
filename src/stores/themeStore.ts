@@ -8,7 +8,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: (localStorage.getItem('theme') as Theme) || 'light',
+  theme: (localStorage.getItem('theme') as Theme) || 'tet',
   setTheme: (theme) => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
