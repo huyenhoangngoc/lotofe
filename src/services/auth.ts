@@ -10,6 +10,7 @@ interface AuthResponse {
     avatarUrl: string
     role: string
     isPremium: boolean
+    premiumExpiresAt: string | null
   }
 }
 
