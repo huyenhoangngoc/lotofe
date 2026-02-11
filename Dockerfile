@@ -1,17 +1,23 @@
-FROM node:22-alpine AS build
+FROM node:lts-alpine AS build
+
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+ENV NPM_CONFIG_FUND=false
+
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
-COPY . .
+COPY . ./
 RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM caddy
+
 WORKDIR /app
-RUN npm install -g serve
 
-COPY --from=build /app/dist ./dist
+COPY Caddyfile ./
+RUN caddy fmt Caddyfile --overwrite
 
-EXPOSE 3000
-CMD ["sh", "-c", "serve dist -s -l ${PORT:-3000}"]
+COPY --from=build /app/dist ./
+
+CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"]
