@@ -166,14 +166,14 @@ export function PlayPage() {
   }, [session, roomCode, navigate])
 
   const toggleMark = useCallback((num: number) => {
-    if (!hideDrawnNumbers && !drawnNumbers.includes(num)) return // Chỉ mark số đã bốc (trừ khi ẩn highlight)
+    if (!drawnNumbers.includes(num)) return // Chỉ mark số đã bốc
     setMarkedNumbers((prev) => {
       const next = new Set(prev)
       if (next.has(num)) next.delete(num)
       else next.add(num)
       return next
     })
-  }, [drawnNumbers, hideDrawnNumbers])
+  }, [drawnNumbers])
 
   // Tìm hàng đầu tiên đã hoàn thành (tất cả số đã mark)
   const findCompleteRow = useCallback((): number => {
