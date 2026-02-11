@@ -322,9 +322,9 @@ export function PlayPage() {
               <div
                 className="rounded-xl p-3 text-center text-sm font-medium"
                 style={{
-                  backgroundColor: 'rgba(253, 224, 71, 0.2)',
-                  border: '1px solid #fde047',
-                  color: '#92400e',
+                  backgroundColor: 'color-mix(in srgb, var(--color-warning) 15%, var(--color-bg-card))',
+                  border: '1px solid var(--color-warning)',
+                  color: 'var(--color-warning)',
                 }}
               >
                 Chế độ nghe số - Hãy lắng nghe và tự tìm số trên vé!
