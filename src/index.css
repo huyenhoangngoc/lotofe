@@ -71,25 +71,3 @@ body {
   min-height: 100vh;
   margin: 0;
 }
-
-/* Tet Mode - Falling petals animation */
-@keyframes falling-petal {
-  0% {
-    transform: translateY(-20px) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-.animate-falling-petal {
-  animation: falling-petal 8s linear infinite;
-}
