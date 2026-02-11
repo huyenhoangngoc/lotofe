@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { api } from '../services/api'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
@@ -61,9 +61,9 @@ export function JoinRoomPage() {
   }
 
   // Auto-check room on mount
-  if (!checked && !loading && roomCode) {
-    checkRoom()
-  }
+  useEffect(() => {
+    if (roomCode) checkRoom()
+  }, [roomCode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -105,7 +105,7 @@ export function JoinRoomPage() {
         {error && !roomInfo && (
           <div className="flex gap-2 mb-4">
             <button
-              onClick={() => { setError(null); setChecked(false) }}
+              onClick={() => checkRoom()}
               className="flex-1 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
               style={{ backgroundColor: 'var(--color-primary-500)', color: 'white' }}
             >
