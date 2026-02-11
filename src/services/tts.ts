@@ -1,5 +1,8 @@
 // TTS Service - Đọc số lô tô bằng tiếng Việt
-// Sử dụng Web Speech API (SpeechSynthesis)
+// Sử dụng Edge TTS Universal (Microsoft Edge TTS via WebSocket)
+// Hoạt động trên cả PC và mobile browser
+
+import { EdgeTTS } from 'edge-tts-universal/browser'
 
 const vietnameseDigits: Record<number, string> = {
   0: 'không',
@@ -32,38 +35,61 @@ export function numberToVietnamese(n: number): string {
   return `${vietnameseDigits[tens]} mươi ${vietnameseDigits[ones]}`
 }
 
-let viVoice: SpeechSynthesisVoice | null = null
-let voiceLoaded = false
+// Voice tiếng Việt của Microsoft Edge
+const VI_VOICE = 'vi-VN-HoaiMyNeural'
 
-function findVietnameseVoice(): SpeechSynthesisVoice | null {
-  if (!('speechSynthesis' in window)) return null
-  const voices = speechSynthesis.getVoices()
-  // Ưu tiên vi-VN voice
-  return (
-    voices.find((v) => v.lang === 'vi-VN') ??
-    voices.find((v) => v.lang.startsWith('vi')) ??
-    null
-  )
-}
+// Cache audio URL đang dùng để revoke sau
+let currentAudioUrl: string | null = null
+let currentAudio: HTMLAudioElement | null = null
 
-// Load voices (async trên một số browser)
+// Không cần initTts nữa - Edge TTS không cần load voices
 export function initTts(): void {
-  if (!('speechSynthesis' in window)) return
-  const tryLoad = () => {
-    viVoice = findVietnameseVoice()
-    voiceLoaded = true
+  // No-op, giữ lại cho backward compat
+}
+
+// Đọc số bằng Edge TTS
+export async function speakNumber(n: number): Promise<void> {
+  // Dừng audio trước nếu đang phát
+  if (currentAudio) {
+    currentAudio.pause()
+    currentAudio = null
   }
-  tryLoad()
-  if (!voiceLoaded || !viVoice) {
-    speechSynthesis.addEventListener('voiceschanged', tryLoad, { once: true })
+  if (currentAudioUrl) {
+    URL.revokeObjectURL(currentAudioUrl)
+    currentAudioUrl = null
+  }
+
+  const text = `số ${numberToVietnamese(n)}`
+
+  try {
+    const tts = new EdgeTTS(text, VI_VOICE, {
+      rate: '-10%',
+      volume: '+0%',
+      pitch: '+0Hz',
+    })
+
+    const result = await tts.synthesize()
+
+    currentAudioUrl = URL.createObjectURL(result.audio)
+    currentAudio = new Audio(currentAudioUrl)
+    currentAudio.onended = () => {
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl)
+        currentAudioUrl = null
+      }
+      currentAudio = null
+    }
+    await currentAudio.play()
+  } catch (err) {
+    console.warn('Edge TTS failed, trying Web Speech API fallback:', err)
+    speakNumberFallback(n)
   }
 }
 
-// Đọc số
-export function speakNumber(n: number): void {
+// Fallback: Web Speech API (cho trường hợp Edge TTS bị lỗi)
+function speakNumberFallback(n: number): void {
   if (!('speechSynthesis' in window)) return
 
-  // Cancel câu trước nếu đang nói
   speechSynthesis.cancel()
 
   const text = `số ${numberToVietnamese(n)}`
@@ -73,14 +99,16 @@ export function speakNumber(n: number): void {
   utterance.pitch = 1.0
   utterance.volume = 1.0
 
-  if (viVoice) {
-    utterance.voice = viVoice
-  }
+  const voices = speechSynthesis.getVoices()
+  const viVoice =
+    voices.find((v) => v.lang === 'vi-VN') ??
+    voices.find((v) => v.lang.startsWith('vi'))
+  if (viVoice) utterance.voice = viVoice
 
   speechSynthesis.speak(utterance)
 }
 
-// Kiểm tra browser có hỗ trợ TTS không
+// Kiểm tra TTS có sẵn không - luôn true vì Edge TTS dùng WebSocket
 export function isTtsAvailable(): boolean {
-  return 'speechSynthesis' in window
+  return true
 }

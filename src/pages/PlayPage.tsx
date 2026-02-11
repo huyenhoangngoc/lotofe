@@ -122,7 +122,7 @@ export function PlayPage() {
             setCurrentNumber(number)
             setDrawOrder(order)
             setDrawnNumbers((prev) => [...prev, number].sort((a, b) => a - b))
-            speakNumber(number)
+            void speakNumber(number)
           }
         })
 

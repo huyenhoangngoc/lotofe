@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { QRCodeSVG } from 'qrcode.react'
+import { Link2 } from 'lucide-react'
 import { api } from '../services/api'
 import { createConnection, startConnection, stopConnection, getConnection } from '../services/signalr'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
@@ -51,6 +52,7 @@ export function RoomHostPage() {
   const [room, setRoom] = useState<RoomData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [players, setPlayers] = useState<PlayerInfo[]>([])
   const [playerCount, setPlayerCount] = useState(0)
@@ -172,6 +174,14 @@ export function RoomHostPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const copyLink = async () => {
+    if (!room) return
+    const url = `${window.location.origin}/join/${room.roomCode}`
+    await navigator.clipboard.writeText(url)
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2000)
+  }
+
   const kickPlayer = async (playerId: string, nickname: string) => {
     if (!room) return
     const conn = getConnection()
@@ -206,7 +216,7 @@ export function RoomHostPage() {
       setCurrentNumber(result.number)
       setDrawOrder(result.drawOrder)
       setDrawnNumbers(result.drawnNumbers)
-      speakNumber(result.number)
+      void speakNumber(result.number)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể bốc số')
     } finally {
@@ -359,16 +369,30 @@ export function RoomHostPage() {
             >
               {room.roomCode}
             </p>
-            <button
-              onClick={copyCode}
-              className="px-6 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
-              style={{
-                backgroundColor: copied ? 'var(--color-success)' : 'var(--color-primary-500)',
-                color: 'var(--color-primary-text)',
-              }}
-            >
-              {copied ? 'Đã copy!' : 'Copy mã phòng'}
-            </button>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={copyCode}
+                className="px-6 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: copied ? 'var(--color-success)' : 'var(--color-primary-500)',
+                  color: 'var(--color-primary-text)',
+                }}
+              >
+                {copied ? 'Đã copy!' : 'Copy mã phòng'}
+              </button>
+              <button
+                onClick={copyLink}
+                className="p-2 rounded-lg transition-all hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: copiedLink ? 'var(--color-success)' : 'var(--color-bg)',
+                  border: '1px solid var(--color-border)',
+                  color: copiedLink ? 'var(--color-primary-text)' : 'var(--color-text-muted)',
+                }}
+                title="Copy link vào phòng"
+              >
+                <Link2 size={18} />
+              </button>
+            </div>
           </div>
 
           {/* QR Code Card */}
