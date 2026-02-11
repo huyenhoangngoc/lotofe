@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { OTPInput, REGEXP_ONLY_DIGITS } from 'input-otp'
 import { useAuthStore } from '../stores/authStore'
 import { useThemeStore } from '../stores/themeStore'
 import { GoogleLoginButton } from '../components/ui/GoogleLoginButton'
@@ -88,23 +89,75 @@ export function HomePage() {
             }}
           >
             <label
-              className="block text-sm font-medium mb-2"
+              className="block text-sm font-medium mb-3 text-center"
               style={{ color: 'var(--color-text-light)' }}
             >
               Nhập mã phòng
             </label>
-            <input
-              type="text"
+            <OTPInput
               maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}
               value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value.replace(/\D/g, ''))}
-              placeholder="000000"
-              className="w-full text-center text-3xl tracking-[0.5em] font-bold p-4 rounded-lg outline-none"
-              style={{
-                backgroundColor: 'var(--color-bg)',
-                border: '2px solid var(--color-border)',
-                color: 'var(--color-text)',
-              }}
+              onChange={setRoomCode}
+              onComplete={handleJoin}
+              containerClassName="flex items-center justify-center gap-2"
+              render={({ slots }) => (
+                <>
+                  <div className="flex gap-1.5">
+                    {slots.slice(0, 3).map((slot, idx) => (
+                      <div
+                        key={idx}
+                        className="relative w-12 h-14 flex items-center justify-center text-2xl font-bold rounded-lg transition-all duration-200"
+                        style={{
+                          backgroundColor: 'var(--color-bg)',
+                          border: slot.isActive
+                            ? '2px solid var(--color-primary-500)'
+                            : '2px solid var(--color-border)',
+                          color: 'var(--color-text)',
+                          boxShadow: slot.isActive
+                            ? '0 0 8px color-mix(in srgb, var(--color-primary-500) 40%, transparent)'
+                            : 'none',
+                        }}
+                      >
+                        {slot.char}
+                        {slot.hasFakeCaret && (
+                          <div className="absolute pointer-events-none inset-0 flex items-center justify-center animate-pulse">
+                            <div className="w-0.5 h-6 rounded-full" style={{ backgroundColor: 'var(--color-primary-500)' }} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="w-4 flex justify-center">
+                    <div className="w-2.5 h-0.5 rounded-full" style={{ backgroundColor: 'var(--color-text-muted)' }} />
+                  </div>
+                  <div className="flex gap-1.5">
+                    {slots.slice(3).map((slot, idx) => (
+                      <div
+                        key={idx}
+                        className="relative w-12 h-14 flex items-center justify-center text-2xl font-bold rounded-lg transition-all duration-200"
+                        style={{
+                          backgroundColor: 'var(--color-bg)',
+                          border: slot.isActive
+                            ? '2px solid var(--color-primary-500)'
+                            : '2px solid var(--color-border)',
+                          color: 'var(--color-text)',
+                          boxShadow: slot.isActive
+                            ? '0 0 8px color-mix(in srgb, var(--color-primary-500) 40%, transparent)'
+                            : 'none',
+                        }}
+                      >
+                        {slot.char}
+                        {slot.hasFakeCaret && (
+                          <div className="absolute pointer-events-none inset-0 flex items-center justify-center animate-pulse">
+                            <div className="w-0.5 h-6 rounded-full" style={{ backgroundColor: 'var(--color-primary-500)' }} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             />
             <button
               onClick={handleJoin}
