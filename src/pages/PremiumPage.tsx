@@ -93,7 +93,7 @@ export function PremiumPage() {
       <div className="max-w-lg mx-auto space-y-4">
         {error && (
           <div className="rounded-xl p-4 text-center font-medium"
-            style={{ backgroundColor: 'var(--color-error)', color: 'white' }}>
+            style={{ backgroundColor: 'var(--color-error)', color: 'var(--color-primary-text)' }}>
             {error}
           </div>
         )}
@@ -118,8 +118,8 @@ export function PremiumPage() {
           <button
             onClick={() => handleUpgrade('yearly')}
             disabled={loading !== null}
-            className="w-full py-3 rounded-xl text-white font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-            style={{ backgroundColor: 'var(--color-primary-500)' }}
+            className="w-full py-3 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
           >
             {loading === 'yearly' ? 'Đang xử lý...' : 'Mua Premium - 50,000đ/năm'}
           </button>

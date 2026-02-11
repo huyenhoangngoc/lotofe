@@ -95,7 +95,7 @@ export function JoinRoomPage() {
         {error && (
           <div
             className="mb-4 p-3 rounded-lg text-sm text-center"
-            style={{ backgroundColor: 'var(--color-error)', color: 'white' }}
+            style={{ backgroundColor: 'var(--color-error)', color: 'var(--color-primary-text)' }}
           >
             {error}
           </div>
@@ -106,7 +106,7 @@ export function JoinRoomPage() {
             <button
               onClick={() => checkRoom()}
               className="flex-1 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
-              style={{ backgroundColor: 'var(--color-primary-500)', color: 'white' }}
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
             >
               Thử lại
             </button>
@@ -176,8 +176,8 @@ export function JoinRoomPage() {
             <button
               onClick={handleJoin}
               disabled={!nickname.trim() || !agreedTerms || loading}
-              className="w-full py-3 rounded-lg text-white font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: 'var(--color-primary-500)' }}
+              className="w-full py-3 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
             >
               {loading ? 'Đang vào...' : 'Vào phòng'}
             </button>

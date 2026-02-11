@@ -163,8 +163,8 @@ export function HomePage() {
             <button
               onClick={handleJoin}
               disabled={roomCode.length !== 6}
-              className="w-full mt-4 py-3 rounded-lg text-white font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: 'var(--color-primary-500)' }}
+              className="w-full mt-4 py-3 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
             >
               Vào phòng
             </button>
@@ -187,7 +187,7 @@ export function HomePage() {
                 className="w-full py-3 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95"
                 style={{
                   backgroundColor: 'var(--color-secondary-500)',
-                  color: 'white',
+                  color: 'var(--color-primary-text)',
                 }}
               >
                 Vào Dashboard

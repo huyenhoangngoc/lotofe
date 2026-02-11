@@ -265,7 +265,7 @@ export function PlayPage() {
             className="rounded-xl p-4 mb-4 text-center font-bold"
             style={{
               backgroundColor: gameFinished ? 'var(--color-success)' : 'var(--color-error)',
-              color: 'white',
+              color: 'var(--color-primary-text)',
             }}
           >
             {kinhMessage}
@@ -424,7 +424,7 @@ export function PlayPage() {
                                         : isCurrent
                                           ? '#fde047'
                                           : isDrawn
-                                            ? '#22c55e'
+                                            ? '#15803d'
                                             : '#ffffff',
                                   border: `1px solid ${ticketColor.bg}30`,
                                   color:

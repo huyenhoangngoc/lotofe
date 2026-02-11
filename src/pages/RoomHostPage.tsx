@@ -320,7 +320,7 @@ export function RoomHostPage() {
           <button
             onClick={closeRoom}
             className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:opacity-80"
-            style={{ backgroundColor: 'var(--color-error)', color: 'white' }}
+            style={{ backgroundColor: 'var(--color-error)', color: 'var(--color-primary-text)' }}
           >
             Rời phòng
           </button>
@@ -335,7 +335,7 @@ export function RoomHostPage() {
               className="rounded-xl p-4 mb-6 text-center font-bold text-lg"
               style={{
                 backgroundColor: gameFinished ? 'var(--color-success)' : 'var(--color-error)',
-                color: 'white',
+                color: 'var(--color-primary-text)',
               }}
             >
               {kinhMessage}
@@ -364,7 +364,7 @@ export function RoomHostPage() {
               className="px-6 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
               style={{
                 backgroundColor: copied ? 'var(--color-success)' : 'var(--color-primary-500)',
-                color: 'white',
+                color: 'var(--color-primary-text)',
               }}
             >
               {copied ? 'Đã copy!' : 'Copy mã phòng'}
@@ -432,7 +432,7 @@ export function RoomHostPage() {
                     <button
                       onClick={() => kickPlayer(player.id, player.nickname)}
                       className="px-3 py-1 rounded text-xs font-medium transition-colors hover:opacity-80"
-                      style={{ backgroundColor: 'var(--color-error)', color: 'white' }}
+                      style={{ backgroundColor: 'var(--color-error)', color: 'var(--color-primary-text)' }}
                     >
                       Kick
                     </button>
@@ -447,8 +447,8 @@ export function RoomHostPage() {
             <button
               onClick={startGame}
               disabled={playerCount === 0 || starting}
-              className="w-full py-4 rounded-xl text-white font-bold text-lg mb-6 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              style={{ backgroundColor: 'var(--color-primary-500)' }}
+              className="w-full py-4 rounded-xl font-bold text-lg mb-6 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
             >
               {starting ? 'Đang bắt đầu...' : 'Bắt đầu game'}
             </button>
@@ -487,8 +487,8 @@ export function RoomHostPage() {
               <button
                 onClick={drawNumber}
                 disabled={drawing || drawOrder >= 90 || gameFinished || autoDrawEnabled}
-                className="w-full py-4 rounded-xl text-white font-bold text-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style={{ backgroundColor: 'var(--color-primary-500)' }}
+                className="w-full py-4 rounded-xl font-bold text-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
               >
                 {autoDrawEnabled
                   ? `Đang tự động bốc (${autoDrawInterval}s)...`

@@ -236,7 +236,7 @@ export function AdminPage() {
                                 className="px-3 py-1 rounded text-xs font-medium"
                                 style={{
                                   backgroundColor: u.isBanned ? 'var(--color-success)' : 'var(--color-error)',
-                                  color: 'white',
+                                  color: 'var(--color-primary-text)',
                                   opacity: actionLoading === u.id ? 0.5 : 1,
                                 }}>
                                 {actionLoading === u.id ? '...' : u.isBanned ? 'Unban' : 'Ban'}
@@ -318,7 +318,7 @@ export function AdminPage() {
                                   style={{
                                     backgroundColor: t.status === 'completed' ? 'var(--color-success)' :
                                       t.status === 'pending' ? 'var(--color-primary-500)' : 'var(--color-error)',
-                                    color: 'white',
+                                    color: 'var(--color-primary-text)',
                                   }}>
                                   {t.status === 'completed' ? 'Hoàn thành' : t.status === 'pending' ? 'Chờ' : 'Lỗi'}
                                 </span>

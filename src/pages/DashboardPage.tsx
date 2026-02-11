@@ -139,8 +139,8 @@ export function DashboardPage() {
             </div>
             <button
               onClick={() => navigate('/room/host')}
-              className="w-full py-4 rounded-lg text-white font-bold text-lg transition-all hover:scale-105 active:scale-95"
-              style={{ backgroundColor: 'var(--color-primary-500)' }}
+              className="w-full py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95"
+              style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
             >
               Vào phòng {activeRoom.roomCode}
             </button>
@@ -159,8 +159,8 @@ export function DashboardPage() {
         ) : (
           <button
             onClick={() => navigate('/room/host')}
-            className="w-full py-4 rounded-lg text-white font-bold text-lg transition-all hover:scale-105 active:scale-95"
-            style={{ backgroundColor: 'var(--color-primary-500)' }}
+            className="w-full py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 active:scale-95"
+            style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
           >
             Tạo phòng mới
           </button>
@@ -169,8 +169,8 @@ export function DashboardPage() {
         {!user.isPremium && (
           <button
             onClick={() => navigate('/premium')}
-            className="w-full py-3 mt-3 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95 text-white"
-            style={{ backgroundColor: 'var(--color-success)' }}
+            className="w-full py-3 mt-3 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"
+            style={{ backgroundColor: 'var(--color-success)', color: 'var(--color-primary-text)' }}
           >
             Nâng cấp Premium (60 người chơi)
           </button>

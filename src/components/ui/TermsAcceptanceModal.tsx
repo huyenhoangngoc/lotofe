@@ -27,7 +27,7 @@ export function TermsAcceptanceModal({ isOpen, onAccept, onDecline, loading }: T
           className="px-6 py-4"
           style={{ backgroundColor: 'var(--color-primary-500)' }}
         >
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-primary-text)' }}>
             Điều khoản sử dụng
           </h2>
         </div>
@@ -139,8 +139,8 @@ export function TermsAcceptanceModal({ isOpen, onAccept, onDecline, loading }: T
           <button
             onClick={onAccept}
             disabled={!agreed || loading}
-            className="flex-1 py-2.5 rounded-lg font-bold text-sm text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: 'var(--color-primary-500)' }}
+            className="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
           >
             {loading ? 'Đang xử lý...' : 'Đồng ý'}
           </button>
