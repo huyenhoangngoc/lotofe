@@ -7,6 +7,7 @@ import { GoogleLoginButton } from '../components/ui/GoogleLoginButton'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { TextType } from '../components/ui/TextType'
 import { FaultyTerminal } from '../components/ui/FaultyTerminal'
+import { DISCLAIMER_SHORT } from '../content/legalContent'
 
 const terminalConfig = {
   light: { bgColor: '#FFF8F0', tint: '#E8D5C4', brightness: 0.6, noiseAmp: 0.6 },
@@ -197,6 +198,39 @@ export function HomePage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center max-w-sm w-full">
+          <p
+            className="text-xs leading-relaxed mb-2 drop-shadow-sm"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            {DISCLAIMER_SHORT}
+          </p>
+          <div className="flex justify-center gap-3 text-xs mb-2">
+            <a
+              href="/terms"
+              className="underline drop-shadow-sm"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              Điều khoản sử dụng
+            </a>
+            <span style={{ color: 'var(--color-text-muted)' }}>|</span>
+            <a
+              href="/privacy"
+              className="underline drop-shadow-sm"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              Chính sách bảo mật
+            </a>
+          </div>
+          <p
+            className="text-xs drop-shadow-sm"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            &copy; {new Date().getFullYear()} Lô Tô Online
+          </p>
         </div>
       </div>
     </div>

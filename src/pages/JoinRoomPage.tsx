@@ -25,6 +25,7 @@ export function JoinRoomPage() {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [agreedTerms, setAgreedTerms] = useState(false)
 
   const checkRoom = async () => {
     if (!roomCode) return
@@ -152,9 +153,29 @@ export function JoinRoomPage() {
               }}
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
             />
+            <label className="flex items-start gap-2 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreedTerms}
+                onChange={(e) => setAgreedTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4"
+                style={{ accentColor: 'var(--color-primary-500)' }}
+              />
+              <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-light)' }}>
+                Tôi đồng ý với{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: 'var(--color-primary-500)' }}>
+                  Điều khoản sử dụng
+                </a>{' '}
+                và{' '}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: 'var(--color-primary-500)' }}>
+                  Chính sách bảo mật
+                </a>
+                . Đây là trò chơi giải trí, không phải cờ bạc.
+              </span>
+            </label>
             <button
               onClick={handleJoin}
-              disabled={!nickname.trim() || loading}
+              disabled={!nickname.trim() || !agreedTerms || loading}
               className="w-full py-3 rounded-lg text-white font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: 'var(--color-primary-500)' }}
             >

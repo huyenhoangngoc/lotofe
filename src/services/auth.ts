@@ -11,7 +11,14 @@ interface AuthResponse {
     role: string
     isPremium: boolean
     premiumExpiresAt: string | null
+    termsAcceptedAt: string | null
+    termsVersion: string | null
   }
+}
+
+interface AcceptTermsResponse {
+  acceptedAt: string
+  termsVersion: string
 }
 
 export const authApi = {
@@ -22,4 +29,7 @@ export const authApi = {
     api.post<{ token: string; refreshToken: string }>('/auth/refresh', { refreshToken }),
 
   getMe: () => api.get<AuthResponse['user']>('/users/me'),
+
+  acceptTerms: (termsVersion: string) =>
+    api.post<AcceptTermsResponse>('/users/me/accept-terms', { termsVersion }),
 }

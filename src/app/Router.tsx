@@ -7,6 +7,8 @@ import { PlayPage } from '../pages/PlayPage'
 import { AdminPage } from '../pages/AdminPage'
 import { PremiumPage } from '../pages/PremiumPage'
 import { PaymentResultPage } from '../pages/PaymentResultPage'
+import { TermsPage } from '../pages/TermsPage'
+import { PrivacyPage } from '../pages/PrivacyPage'
 import { useAuthStore } from '../stores/authStore'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -66,6 +68,8 @@ export function Router() {
           </AuthGuard>
         }
       />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/join/:roomCode" element={<JoinRoomPage />} />
       <Route path="/play/:roomCode" element={<PlayPage />} />
     </Routes>

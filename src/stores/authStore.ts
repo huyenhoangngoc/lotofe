@@ -8,6 +8,8 @@ interface User {
   role: string
   isPremium: boolean
   premiumExpiresAt: string | null
+  termsAcceptedAt: string | null
+  termsVersion: string | null
 }
 
 interface AuthState {

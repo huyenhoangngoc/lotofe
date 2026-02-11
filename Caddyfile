@@ -1,6 +1,21 @@
 :{$PORT}
 
-root * /app
-file_server
+header Cross-Origin-Opener-Policy "same-origin-allow-popups"
 
-try_files {path} /index.html
+handle /api/* {
+	reverse_proxy https://loto-backend-production.up.railway.app {
+		header_up Host loto-backend-production.up.railway.app
+	}
+}
+
+handle /hubs/* {
+	reverse_proxy https://loto-backend-production.up.railway.app {
+		header_up Host loto-backend-production.up.railway.app
+	}
+}
+
+handle {
+	root * /app
+	try_files {path} /index.html
+	file_server
+}

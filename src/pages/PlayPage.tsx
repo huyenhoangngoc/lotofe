@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { api } from '../services/api'
-import { createConnection, startConnection, stopConnection } from '../services/signalr'
+import { createConnection, getConnection, startConnection, stopConnection } from '../services/signalr'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { initTts, speakNumber } from '../services/tts'
 
@@ -193,7 +193,15 @@ export function PlayPage() {
     }
   }
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
+    try {
+      const conn = getConnection()
+      if (conn && roomCode) {
+        await conn.invoke('LeaveRoom', roomCode)
+      }
+    } catch {
+      // Ignore - connection might already be closed
+    }
     localStorage.removeItem('playerSession')
     navigate('/')
   }
