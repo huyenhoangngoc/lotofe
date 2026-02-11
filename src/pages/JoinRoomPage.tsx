@@ -25,7 +25,6 @@ export function JoinRoomPage() {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [checked, setChecked] = useState(false)
 
   const checkRoom = async () => {
     if (!roomCode) return
@@ -34,7 +33,6 @@ export function JoinRoomPage() {
     try {
       const info = await api.get<RoomInfo>(`/rooms/${roomCode}`)
       setRoomInfo(info)
-      setChecked(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Phòng không tồn tại')
     } finally {
