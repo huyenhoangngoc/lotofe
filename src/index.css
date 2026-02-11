@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* Theme CSS Variables */
+:root[data-theme="light"] {
+  --color-primary-500: #D42027;
+  --color-primary-600: #B91C22;
+  --color-secondary-500: #D4A017;
+  --color-bg: #FFF8F0;
+  --color-bg-card: #FFFFFF;
+  --color-bg-hover: #FFF1E6;
+  --color-text: #2D1810;
+  --color-text-light: #6B4C3B;
+  --color-text-muted: #A0826D;
+  --color-border: #E8D5C4;
+  --color-success: #38A169;
+  --color-warning: #DD6B20;
+  --color-error: #E53E3E;
+  --color-ticket-bg: #FFF8E7;
+  --color-ticket-border: #C4956A;
+  --color-stamp: #D42027;
+}
+
+:root[data-theme="dark"] {
+  --color-primary-500: #FFD700;
+  --color-primary-600: #D4B000;
+  --color-secondary-500: #E85D5D;
+  --color-bg: #0F0F1A;
+  --color-bg-card: #1A1A2E;
+  --color-bg-hover: #252540;
+  --color-text: #F5F0E8;
+  --color-text-light: #C4B8A8;
+  --color-text-muted: #8A7E6E;
+  --color-border: #2E2E48;
+  --color-success: #48BB78;
+  --color-warning: #ED8936;
+  --color-error: #FC8181;
+  --color-ticket-bg: #1E1E32;
+  --color-ticket-border: #FFD700;
+  --color-stamp: #FFD700;
+}
+
+:root[data-theme="tet"] {
+  --color-primary-500: #CC0000;
+  --color-primary-600: #A30000;
+  --color-secondary-500: #FFB800;
+  --color-bg: #8B0000;
+  --color-bg-card: #A50000;
+  --color-bg-hover: #BF0000;
+  --color-text: #FFF8DC;
+  --color-text-light: #FFE4B5;
+  --color-text-muted: #CD853F;
+  --color-border: #CC3333;
+  --color-success: #FFD700;
+  --color-warning: #FFA500;
+  --color-error: #FF6347;
+  --color-ticket-bg: #B22222;
+  --color-ticket-border: #FFD700;
+  --color-stamp: #FFD700;
+}
+
+body {
+  font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Tet Mode - Falling petals animation */
+@keyframes falling-petal {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-falling-petal {
+  animation: falling-petal 8s linear infinite;
+}
