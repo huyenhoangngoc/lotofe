@@ -49,6 +49,7 @@ export function PlayPage() {
   const [kinhMessage, setKinhMessage] = useState<string | null>(null)
   const [gameFinished, setGameFinished] = useState(false)
   const [claimingKinh, setClaimingKinh] = useState(false)
+  const [hideDrawnNumbers, setHideDrawnNumbers] = useState(false)
   const ttsInitialized = useRef(false)
 
   // Random màu vé khi mount
@@ -136,9 +137,21 @@ export function PlayPage() {
           }
         })
 
+        conn.on('RoomSettingsChanged', (hideDrawn: boolean) => {
+          if (mounted) setHideDrawnNumbers(hideDrawn)
+        })
+
         await startConnection()
         await conn.invoke('JoinRoom', roomCode, session.playerId)
         if (mounted) setConnected(true)
+
+        // Fetch current room settings
+        try {
+          const settings = await api.get<{ hideDrawnNumbers: boolean }>(`/rooms/${roomCode}/settings`)
+          if (mounted) setHideDrawnNumbers(settings.hideDrawnNumbers)
+        } catch {
+          // Settings fetch failed - use defaults
+        }
       } catch {
         if (mounted) navigate(`/join/${roomCode}`)
       }
@@ -153,14 +166,14 @@ export function PlayPage() {
   }, [session, roomCode, navigate])
 
   const toggleMark = useCallback((num: number) => {
-    if (!drawnNumbers.includes(num)) return // Chỉ mark số đã bốc
+    if (!hideDrawnNumbers && !drawnNumbers.includes(num)) return // Chỉ mark số đã bốc (trừ khi ẩn highlight)
     setMarkedNumbers((prev) => {
       const next = new Set(prev)
       if (next.has(num)) next.delete(num)
       else next.add(num)
       return next
     })
-  }, [drawnNumbers])
+  }, [drawnNumbers, hideDrawnNumbers])
 
   // Tìm hàng đầu tiên đã hoàn thành (tất cả số đã mark)
   const findCompleteRow = useCallback((): number => {
@@ -304,6 +317,19 @@ export function PlayPage() {
         {/* Game Active */}
         {gameStarted && ticket && (
           <div className="space-y-4">
+            {/* Hide drawn numbers notice */}
+            {hideDrawnNumbers && !gameFinished && (
+              <div
+                className="rounded-xl p-3 text-center text-sm font-medium"
+                style={{
+                  backgroundColor: 'rgba(253, 224, 71, 0.2)',
+                  border: '1px solid #fde047',
+                  color: '#92400e',
+                }}
+              >
+                Chế độ nghe số - Hãy lắng nghe và tự tìm số trên vé!
+              </div>
+            )}
             {/* Current Number */}
             {currentNumber !== null && (
               <div
@@ -367,19 +393,23 @@ export function PlayPage() {
                       >
                         {blockRows.flatMap((row, rowIdx) =>
                           row.map((num, colIdx) => {
-                            const isDrawn = num !== null && drawnNumbers.includes(num)
+                            const isActuallyDrawn = num !== null && drawnNumbers.includes(num)
+                            const isDrawn = hideDrawnNumbers ? false : isActuallyDrawn
                             const isMarked = num !== null && markedNumbers.has(num)
                             const isCurrent = num !== null && num === currentNumber
+                            const canClick = hideDrawnNumbers
+                              ? (num !== null && !gameFinished)
+                              : (num !== null && isActuallyDrawn && !gameFinished)
                             return (
                               <button
                                 key={`${blockIdx}-${rowIdx}-${colIdx}`}
-                                onClick={() => num !== null && isDrawn && toggleMark(num)}
-                                disabled={num === null || !isDrawn || gameFinished}
+                                onClick={() => num !== null && canClick && toggleMark(num)}
+                                disabled={!canClick}
                                 className={[
                                   'flex items-center justify-center',
                                   'text-xs sm:text-sm md:text-base',
                                   'font-bold transition-all',
-                                  num !== null && isDrawn && !gameFinished
+                                  canClick
                                     ? 'hover:scale-105 active:scale-95'
                                     : '',
                                   isCurrent && !isMarked ? 'animate-pulse' : '',
@@ -405,10 +435,7 @@ export function PlayPage() {
                                         : isCurrent
                                           ? '#92400e'
                                           : '#1e293b',
-                                  cursor:
-                                    num !== null && isDrawn && !gameFinished
-                                      ? 'pointer'
-                                      : 'default',
+                                  cursor: canClick ? 'pointer' : 'default',
                                   boxShadow: isMarked
                                     ? 'inset 0 2px 4px rgba(0,0,0,0.3)'
                                     : isCurrent

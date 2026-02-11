@@ -39,6 +39,11 @@ interface GameState {
   drawOrder: number
   currentNumber: number | null
   drawnNumbers: number[]
+  hideDrawnNumbers: boolean
+}
+
+interface RoomSettingsResponse {
+  hideDrawnNumbers: boolean
 }
 
 export function RoomHostPage() {
@@ -57,6 +62,12 @@ export function RoomHostPage() {
   const [drawing, setDrawing] = useState(false)
   const [kinhMessage, setKinhMessage] = useState<string | null>(null)
   const [gameFinished, setGameFinished] = useState(false)
+  const [autoDrawEnabled, setAutoDrawEnabled] = useState(false)
+  const [autoDrawInterval, setAutoDrawInterval] = useState(5)
+  const [autoDrawPaused, setAutoDrawPaused] = useState(false)
+  const [hideDrawnNumbers, setHideDrawnNumbers] = useState(false)
+  const autoDrawRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const drawingRef = useRef(false)
   const ttsInitialized = useRef(false)
 
   // Khởi tạo TTS
@@ -101,6 +112,7 @@ export function RoomHostPage() {
               setDrawOrder(state.drawOrder)
               setCurrentNumber(state.currentNumber)
               setDrawnNumbers(state.drawnNumbers)
+              setHideDrawnNumbers(state.hideDrawnNumbers)
             }
           } catch {
             // Không lấy được state → vẫn vào phòng bình thường
@@ -123,7 +135,12 @@ export function RoomHostPage() {
         conn.on('KinhResult', (_nickname: string, valid: boolean, _rowIndex: number, message: string) => {
           setKinhMessage(`${valid ? 'KINH!' : ''} ${message}`)
           if (valid) setGameFinished(true)
-          if (!valid) setTimeout(() => setKinhMessage(null), 3000)
+          if (!valid) {
+            // Pause auto-draw 5s khi KINH invalid
+            setAutoDrawPaused(true)
+            setTimeout(() => setAutoDrawPaused(false), 5000)
+            setTimeout(() => setKinhMessage(null), 3000)
+          }
         })
 
         conn.on('GameStatusChanged', (status: string) => {
@@ -180,8 +197,9 @@ export function RoomHostPage() {
     }
   }
 
-  const drawNumber = async () => {
-    if (!room || drawing || gameFinished) return
+  const drawNumber = useCallback(async () => {
+    if (!room || drawingRef.current || gameFinished) return
+    drawingRef.current = true
     setDrawing(true)
     try {
       const result = await api.post<DrawResult>(`/rooms/${room.roomCode}/draw`)
@@ -192,9 +210,10 @@ export function RoomHostPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể bốc số')
     } finally {
+      drawingRef.current = false
       setDrawing(false)
     }
-  }
+  }, [room, gameFinished])
 
   const endGame = async () => {
     if (!room || gameFinished) return
@@ -203,6 +222,47 @@ export function RoomHostPage() {
       setGameFinished(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể kết thúc game')
+    }
+  }
+
+  // Auto-draw timer
+  useEffect(() => {
+    if (autoDrawRef.current) {
+      clearInterval(autoDrawRef.current)
+      autoDrawRef.current = null
+    }
+
+    if (autoDrawEnabled && !autoDrawPaused && gameStarted && !gameFinished && drawOrder < 90) {
+      autoDrawRef.current = setInterval(() => {
+        drawNumber()
+      }, autoDrawInterval * 1000)
+    }
+
+    return () => {
+      if (autoDrawRef.current) {
+        clearInterval(autoDrawRef.current)
+        autoDrawRef.current = null
+      }
+    }
+  }, [autoDrawEnabled, autoDrawPaused, autoDrawInterval, gameStarted, gameFinished, drawOrder, drawNumber])
+
+  // Dừng auto-draw khi game kết thúc
+  useEffect(() => {
+    if (gameFinished) {
+      setAutoDrawEnabled(false)
+    }
+  }, [gameFinished])
+
+  const toggleHideDrawnNumbers = async () => {
+    if (!room) return
+    const newValue = !hideDrawnNumbers
+    setHideDrawnNumbers(newValue)
+    try {
+      await api.put<RoomSettingsResponse>(`/rooms/${room.roomCode}/settings`, {
+        hideDrawnNumbers: newValue,
+      })
+    } catch {
+      setHideDrawnNumbers(!newValue)
     }
   }
 
@@ -426,12 +486,108 @@ export function RoomHostPage() {
               {/* Draw Button */}
               <button
                 onClick={drawNumber}
-                disabled={drawing || drawOrder >= 90 || gameFinished}
+                disabled={drawing || drawOrder >= 90 || gameFinished || autoDrawEnabled}
                 className="w-full py-4 rounded-xl text-white font-bold text-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style={{ backgroundColor: 'var(--color-primary-500)' }}
               >
-                {drawing ? 'Đang bốc...' : gameFinished ? 'Game kết thúc!' : drawOrder >= 90 ? 'Đã bốc hết!' : 'Bốc số'}
+                {autoDrawEnabled
+                  ? `Đang tự động bốc (${autoDrawInterval}s)...`
+                  : drawing
+                    ? 'Đang bốc...'
+                    : gameFinished
+                      ? 'Game kết thúc!'
+                      : drawOrder >= 90
+                        ? 'Đã bốc hết!'
+                        : 'Bốc số'}
               </button>
+
+              {/* Game Settings */}
+              {!gameFinished && (
+                <div
+                  className="rounded-xl p-4 shadow-lg space-y-4"
+                  style={{
+                    backgroundColor: 'var(--color-bg-card)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                >
+                  {/* Auto-draw toggle */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
+                          Bốc số tự động
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setAutoDrawEnabled(!autoDrawEnabled)}
+                        className="relative w-11 h-6 rounded-full transition-colors"
+                        style={{
+                          backgroundColor: autoDrawEnabled ? 'var(--color-primary-500)' : 'var(--color-border)',
+                        }}
+                      >
+                        <div
+                          className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                          style={{ left: autoDrawEnabled ? '22px' : '2px' }}
+                        />
+                      </button>
+                    </div>
+                    {autoDrawEnabled && (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex gap-2">
+                          {[3, 5, 7, 10].map((sec) => (
+                            <button
+                              key={sec}
+                              onClick={() => setAutoDrawInterval(sec)}
+                              className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
+                              style={{
+                                backgroundColor: autoDrawInterval === sec ? 'var(--color-primary-500)' : 'var(--color-bg)',
+                                color: autoDrawInterval === sec ? 'white' : 'var(--color-text-muted)',
+                                border: `1px solid ${autoDrawInterval === sec ? 'var(--color-primary-500)' : 'var(--color-border)'}`,
+                              }}
+                            >
+                              {sec}s
+                            </button>
+                          ))}
+                        </div>
+                        {autoDrawPaused && (
+                          <p className="text-xs text-center" style={{ color: 'var(--color-error)' }}>
+                            Tạm dừng... (KINH đang kiểm tra)
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Divider */}
+                  <div style={{ borderTop: '1px solid var(--color-border)' }} />
+
+                  {/* Hide drawn numbers toggle */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm" style={{ color: 'var(--color-text)' }}>
+                          Ẩn số trên vé
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                          Người chơi phải tự tìm số
+                        </p>
+                      </div>
+                      <button
+                        onClick={toggleHideDrawnNumbers}
+                        className="relative w-11 h-6 rounded-full transition-colors"
+                        style={{
+                          backgroundColor: hideDrawnNumbers ? 'var(--color-primary-500)' : 'var(--color-border)',
+                        }}
+                      >
+                        <div
+                          className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                          style={{ left: hideDrawnNumbers ? '22px' : '2px' }}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* End Game Button */}
               {!gameFinished && (
