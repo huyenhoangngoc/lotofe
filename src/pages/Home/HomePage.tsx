@@ -16,7 +16,7 @@ export function HomePage() {
           className="text-5xl md:text-7xl font-bold mb-4"
           style={{
             fontFamily: "'Playfair Display', serif",
-            color: 'var(--color-primary-500)',
+            color: 'var(--color-title)',
           }}
         >
           Lô Tô Online

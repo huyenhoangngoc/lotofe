@@ -2,6 +2,7 @@
 
 /* Theme CSS Variables */
 :root[data-theme="light"] {
+  --color-title: #D42027;
   --color-primary-500: #D42027;
   --color-primary-600: #B91C22;
   --color-secondary-500: #D4A017;
@@ -21,6 +22,7 @@
 }
 
 :root[data-theme="dark"] {
+  --color-title: #FFD700;
   --color-primary-500: #FFD700;
   --color-primary-600: #D4B000;
   --color-secondary-500: #E85D5D;
@@ -40,6 +42,7 @@
 }
 
 :root[data-theme="tet"] {
+  --color-title: #FFD700;
   --color-primary-500: #CC0000;
   --color-primary-600: #A30000;
   --color-secondary-500: #FFB800;
