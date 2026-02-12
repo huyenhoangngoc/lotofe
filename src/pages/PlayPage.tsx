@@ -107,6 +107,13 @@ export function PlayPage() {
           if (mounted) {
             setTicket(ticketData)
             setGameStarted(true)
+            // Restore marked numbers từ localStorage
+            const saved = localStorage.getItem(`marks_${ticketData.id}`)
+            if (saved) {
+              try {
+                setMarkedNumbers(new Set(JSON.parse(saved) as number[]))
+              } catch { /* ignore */ }
+            }
           }
         })
 
@@ -174,6 +181,13 @@ export function PlayPage() {
       return next
     })
   }, [drawnNumbers])
+
+  // Persist marked numbers vào localStorage
+  useEffect(() => {
+    if (ticket && markedNumbers.size > 0) {
+      localStorage.setItem(`marks_${ticket.id}`, JSON.stringify([...markedNumbers]))
+    }
+  }, [ticket, markedNumbers])
 
   // Tìm hàng đầu tiên đã hoàn thành (tất cả số đã mark)
   const findCompleteRow = useCallback((): number => {
