@@ -18,20 +18,22 @@ export function DashboardPage() {
   const navigate = useNavigate()
   const [activeRoom, setActiveRoom] = useState<ActiveRoom | null>(null)
   const [checking, setChecking] = useState(true)
+  const [globalPremium, setGlobalPremium] = useState(false)
 
   useEffect(() => {
     let mounted = true
-    const checkActiveRoom = async () => {
-      try {
-        const room = await api.get<ActiveRoom>('/rooms/my-active')
-        if (mounted) setActiveRoom(room)
-      } catch {
-        // 204 hoặc lỗi → không có phòng active
-      } finally {
-        if (mounted) setChecking(false)
-      }
+    const init = async () => {
+      const [,] = await Promise.allSettled([
+        api.get<ActiveRoom>('/rooms/my-active').then((room) => {
+          if (mounted) setActiveRoom(room)
+        }),
+        api.get<{ globalPremiumEnabled: boolean }>('/payment/premium-status').then((r) => {
+          if (mounted) setGlobalPremium(r.globalPremiumEnabled)
+        }),
+      ])
+      if (mounted) setChecking(false)
     }
-    checkActiveRoom()
+    init()
     return () => { mounted = false }
   }, [])
 
@@ -74,9 +76,11 @@ export function DashboardPage() {
               {user.displayName}
             </p>
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-              {user.isPremium
-                ? `Premium${user.premiumExpiresAt ? ` - HH: ${new Date(user.premiumExpiresAt).toLocaleDateString('vi-VN')}` : ''}`
-                : 'Free'}
+              {globalPremium
+                ? 'Premium (Beta)'
+                : user.isPremium
+                  ? `Premium${user.premiumExpiresAt ? ` - HH: ${new Date(user.premiumExpiresAt).toLocaleDateString('vi-VN')}` : ''}`
+                  : 'Free'}
             </p>
           </div>
           <button
@@ -101,17 +105,19 @@ export function DashboardPage() {
           Chào mừng, {user.displayName}!
         </h2>
         <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>
-          {user.isPremium
-            ? <>
-                Bạn có thể tạo phòng với tối đa 60 người chơi
-                {user.premiumExpiresAt && (
-                  <span className="block text-xs mt-1">
-                    Hết hạn: {new Date(user.premiumExpiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                    {' '}({Math.max(0, Math.ceil((new Date(user.premiumExpiresAt).getTime() - Date.now()) / 86400000))} ngày còn lại)
-                  </span>
-                )}
-              </>
-            : 'Bạn có thể tạo phòng với tối đa 5 người chơi'}
+          {globalPremium
+            ? 'Bạn có thể tạo phòng với tối đa 60 người chơi (Beta miễn phí)'
+            : user.isPremium
+              ? <>
+                  Bạn có thể tạo phòng với tối đa 60 người chơi
+                  {user.premiumExpiresAt && (
+                    <span className="block text-xs mt-1">
+                      Hết hạn: {new Date(user.premiumExpiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      {' '}({Math.max(0, Math.ceil((new Date(user.premiumExpiresAt).getTime() - Date.now()) / 86400000))} ngày còn lại)
+                    </span>
+                  )}
+                </>
+              : 'Bạn có thể tạo phòng với tối đa 5 người chơi'}
         </p>
 
         {checking ? (
@@ -166,7 +172,7 @@ export function DashboardPage() {
           </button>
         )}
 
-        {!user.isPremium && (
+        {!globalPremium && !user.isPremium && (
           <button
             onClick={() => navigate('/premium')}
             className="w-full py-3 mt-3 rounded-lg font-medium text-sm transition-all hover:scale-105 active:scale-95"

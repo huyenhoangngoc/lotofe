@@ -25,7 +25,7 @@ interface PagedUsers {
 interface TransactionItem {
   id: string
   userId: string
-  orderId: string
+  sessionId: string
   amount: number
   planType: string
   status: string
@@ -41,7 +41,11 @@ interface RevenueData {
   pageSize: number
 }
 
-type Tab = 'users' | 'revenue'
+interface GlobalPremiumData {
+  enabled: boolean
+}
+
+type Tab = 'users' | 'revenue' | 'settings'
 
 export function AdminPage() {
   const navigate = useNavigate()
@@ -60,6 +64,11 @@ export function AdminPage() {
   // Revenue state
   const [revenue, setRevenue] = useState<RevenueData | null>(null)
   const [revLoading, setRevLoading] = useState(false)
+
+  // Settings state
+  const [globalPremium, setGlobalPremium] = useState(false)
+  const [settingsLoading, setSettingsLoading] = useState(false)
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
 
   const pageSize = 20
 
@@ -86,6 +95,17 @@ export function AdminPage() {
     }
   }, [])
 
+  const fetchSettings = useCallback(async () => {
+    setSettingsLoading(true)
+    try {
+      const result = await api.get<GlobalPremiumData>('/admin/settings/global-premium')
+      setGlobalPremium(result.enabled)
+      setSettingsLoaded(true)
+    } catch { /* ignore */ } finally {
+      setSettingsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (user?.role !== 'admin') {
       navigate('/dashboard')
@@ -96,7 +116,8 @@ export function AdminPage() {
 
   useEffect(() => {
     if (tab === 'revenue' && !revenue) fetchRevenue()
-  }, [tab, revenue, fetchRevenue])
+    if (tab === 'settings' && !settingsLoaded) fetchSettings()
+  }, [tab, revenue, fetchRevenue, settingsLoaded, fetchSettings])
 
   const toggleBan = async (userId: string, isBanned: boolean) => {
     setActionLoading(userId)
@@ -106,6 +127,16 @@ export function AdminPage() {
       await fetchUsers()
     } catch { /* ignore */ } finally {
       setActionLoading(null)
+    }
+  }
+
+  const toggleGlobalPremium = async () => {
+    setSettingsLoading(true)
+    try {
+      await api.post('/admin/settings/global-premium', { enabled: !globalPremium })
+      setGlobalPremium(!globalPremium)
+    } catch { /* ignore */ } finally {
+      setSettingsLoading(false)
     }
   }
 
@@ -146,7 +177,7 @@ export function AdminPage() {
       <div className="max-w-4xl mx-auto">
         {/* Tabs */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
-          {(['users', 'revenue'] as Tab[]).map((t) => (
+          {(['users', 'revenue', 'settings'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -156,7 +187,7 @@ export function AdminPage() {
                 color: tab === t ? 'white' : 'var(--color-text-muted)',
               }}
             >
-              {t === 'users' ? 'Người dùng' : 'Doanh thu'}
+              {t === 'users' ? 'Người dùng' : t === 'revenue' ? 'Doanh thu' : 'Cài đặt'}
             </button>
           ))}
         </div>
@@ -294,7 +325,7 @@ export function AdminPage() {
                       <table className="w-full text-sm">
                         <thead>
                           <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                            <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Mã đơn</th>
+                            <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Session ID</th>
                             <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Gói</th>
                             <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Số tiền</th>
                             <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Trạng thái</th>
@@ -305,7 +336,7 @@ export function AdminPage() {
                           {revenue.items.map((t) => (
                             <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                               <td className="p-3 font-mono text-xs" style={{ color: 'var(--color-text)' }}>
-                                {t.orderId.slice(0, 20)}...
+                                {t.sessionId.slice(0, 20)}...
                               </td>
                               <td className="p-3" style={{ color: 'var(--color-text)' }}>
                                 {t.planType === 'yearly' ? 'Năm' : t.planType}
@@ -336,6 +367,38 @@ export function AdminPage() {
               </>
             ) : null}
           </>
+        )}
+
+        {/* Settings Tab */}
+        {tab === 'settings' && (
+          <div className="rounded-xl p-6 shadow-lg"
+            style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>Cài đặt hệ thống</h3>
+
+            <div className="flex items-center justify-between py-4"
+              style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <div>
+                <p className="font-medium" style={{ color: 'var(--color-text)' }}>Bật Premium cho tất cả</p>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                  Khi bật, tất cả người dùng sẽ có quyền Premium (tối đa 60 người chơi/phòng) mà không cần thanh toán.
+                  Dùng cho khuyến mãi hoặc giai đoạn beta.
+                </p>
+              </div>
+              <button
+                onClick={toggleGlobalPremium}
+                disabled={settingsLoading}
+                className="ml-4 px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0"
+                style={{
+                  backgroundColor: globalPremium ? 'var(--color-success)' : 'var(--color-bg)',
+                  color: globalPremium ? 'white' : 'var(--color-text-muted)',
+                  border: globalPremium ? 'none' : '1px solid var(--color-border)',
+                  opacity: settingsLoading ? 0.5 : 1,
+                }}
+              >
+                {settingsLoading ? '...' : globalPremium ? 'Đang bật' : 'Đang tắt'}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

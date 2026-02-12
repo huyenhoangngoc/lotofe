@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/authStore'
 import { authApi } from '../services/auth'
 
 interface PaymentStatus {
-  orderId: string
+  sessionId: string
   status: string
   amount: number
   planType: string
@@ -21,26 +21,18 @@ export function PaymentResultPage() {
   const [message, setMessage] = useState('Đang xác nhận thanh toán...')
 
   useEffect(() => {
-    const orderId = searchParams.get('orderId')
-    const resultCode = searchParams.get('resultCode')
+    const sessionId = searchParams.get('session_id')
 
-    if (!orderId) {
+    if (!sessionId) {
       setStatus('failed')
       setMessage('Không tìm thấy thông tin thanh toán')
       return
     }
 
-    // MoMo redirect kèm resultCode - nếu != 0 thì fail ngay
-    if (resultCode && resultCode !== '0') {
-      setStatus('failed')
-      setMessage('Thanh toán không thành công')
-      return
-    }
-
-    // Gọi verify endpoint
+    // Goi verify endpoint
     const verify = async () => {
       try {
-        const result = await api.post<PaymentStatus>(`/payment/verify/${orderId}`)
+        const result = await api.post<PaymentStatus>(`/payment/verify/${sessionId}`)
 
         if (result.status === 'completed') {
           setStatus('success')
@@ -53,12 +45,12 @@ export function PaymentResultPage() {
               setAuth(me, token, refreshToken)
             }
           } catch {
-            // ignore - user data sẽ refresh lần sau
+            // ignore - user data se refresh lan sau
           }
         } else if (result.status === 'pending') {
           setStatus('pending')
           setMessage('Thanh toán đang được xử lý, vui lòng chờ...')
-          // Retry sau 3 giây
+          // Retry sau 3 giay
           setTimeout(verify, 3000)
         } else {
           setStatus('failed')

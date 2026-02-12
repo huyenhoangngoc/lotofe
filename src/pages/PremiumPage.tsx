@@ -1,15 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { api } from '../services/api'
 import { useAuthStore } from '../stores/authStore'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 
 interface CreatePaymentResponse {
-  orderId: string
-  payUrl: string
-  qrCodeUrl: string | null
+  sessionId: string
+  checkoutUrl: string
   amount: number
   expireAt: string
+}
+
+interface PremiumStatus {
+  globalPremiumEnabled: boolean
 }
 
 export function PremiumPage() {
@@ -17,14 +20,22 @@ export function PremiumPage() {
   const user = useAuthStore((s) => s.user)
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [globalPremium, setGlobalPremium] = useState(false)
+  const [checking, setChecking] = useState(true)
 
-  const handleUpgrade = async (planType: 'monthly' | 'yearly') => {
+  useEffect(() => {
+    api.get<PremiumStatus>('/payment/premium-status')
+      .then((r) => setGlobalPremium(r.globalPremiumEnabled))
+      .catch(() => {})
+      .finally(() => setChecking(false))
+  }, [])
+
+  const handleUpgrade = async (planType: 'yearly') => {
     setLoading(planType)
     setError(null)
     try {
       const result = await api.post<CreatePaymentResponse>('/payment/create', { planType })
-      // Redirect sang MoMo payment page
-      window.location.href = result.payUrl
+      window.location.href = result.checkoutUrl
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi tạo thanh toán')
     } finally {
@@ -32,22 +43,65 @@ export function PremiumPage() {
     }
   }
 
+  const header = (
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-xl font-bold" style={{ color: 'var(--color-primary-500)' }}>Premium</h1>
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium"
+          style={{ border: '1px solid var(--color-border)', color: 'var(--color-text-light)' }}
+        >
+          Quay lại
+        </button>
+      </div>
+    </div>
+  )
+
+  if (checking) {
+    return (
+      <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'var(--color-bg)' }}>
+        {header}
+        <p className="text-center" style={{ color: 'var(--color-text-muted)' }}>Đang tải...</p>
+      </div>
+    )
+  }
+
+  // Global Premium đang bật → hiện thông báo beta
+  if (globalPremium) {
+    return (
+      <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'var(--color-bg)' }}>
+        {header}
+        <div className="max-w-md mx-auto rounded-xl p-8 text-center shadow-lg"
+          style={{ backgroundColor: 'var(--color-bg-card)', border: '2px solid var(--color-success)' }}>
+          <p className="text-4xl mb-4">&#127881;</p>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-success)' }}>
+            Premium miễn phí!
+          </h2>
+          <p className="mb-2" style={{ color: 'var(--color-text)' }}>
+            Hệ thống đang trong giai đoạn Beta
+          </p>
+          <p style={{ color: 'var(--color-text-muted)' }}>
+            Tất cả người dùng đều được sử dụng tính năng Premium (tối đa 60 người chơi/phòng) miễn phí.
+          </p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="mt-6 w-full py-3 rounded-xl font-bold transition-all hover:scale-105 active:scale-95"
+            style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--color-primary-text)' }}
+          >
+            Về Dashboard
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // User đã có Premium cá nhân
   if (user?.isPremium) {
     return (
       <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'var(--color-bg)' }}>
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-bold" style={{ color: 'var(--color-primary-500)' }}>Premium</h1>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium"
-              style={{ border: '1px solid var(--color-border)', color: 'var(--color-text-light)' }}
-            >
-              Quay lại
-            </button>
-          </div>
-        </div>
+        {header}
         <div className="max-w-md mx-auto rounded-xl p-8 text-center shadow-lg"
           style={{ backgroundColor: 'var(--color-bg-card)', border: '2px solid var(--color-success)' }}>
           <p className="text-4xl mb-4">&#11088;</p>
@@ -72,6 +126,7 @@ export function PremiumPage() {
     )
   }
 
+  // Chưa Premium → hiện form mua
   return (
     <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'var(--color-bg)' }}>
       <div className="flex items-center justify-between mb-8">
@@ -98,7 +153,6 @@ export function PremiumPage() {
           </div>
         )}
 
-        {/* Yearly Plan */}
         <div
           className="rounded-xl p-6 shadow-lg"
           style={{ backgroundColor: 'var(--color-bg-card)', border: '2px solid var(--color-primary-500)' }}
@@ -113,7 +167,7 @@ export function PremiumPage() {
           <ul className="text-sm space-y-1 mb-4" style={{ color: 'var(--color-text-muted)' }}>
             <li>- Tối đa 60 người chơi/phòng</li>
             <li>- Sử dụng 1 năm</li>
-            <li>- Thanh toán qua MoMo</li>
+            <li>- Thanh toán qua Stripe</li>
           </ul>
           <button
             onClick={() => handleUpgrade('yearly')}
