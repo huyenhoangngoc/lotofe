@@ -30,7 +30,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-dvh relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Terminal background */}
       <div className="absolute inset-0">
         <FaultyTerminal
@@ -53,7 +53,7 @@ export function HomePage() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-dvh flex flex-col items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
