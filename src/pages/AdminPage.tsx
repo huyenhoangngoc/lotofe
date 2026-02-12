@@ -41,10 +41,6 @@ interface RevenueData {
   pageSize: number
 }
 
-interface AppSettings {
-  globalPremiumEnabled: boolean
-}
-
 type Tab = 'users' | 'revenue'
 
 export function AdminPage() {
@@ -64,10 +60,6 @@ export function AdminPage() {
   // Revenue state
   const [revenue, setRevenue] = useState<RevenueData | null>(null)
   const [revLoading, setRevLoading] = useState(false)
-
-  // Settings state
-  const [globalPremium, setGlobalPremium] = useState(false)
-  const [settingsLoading, setSettingsLoading] = useState(false)
 
   const pageSize = 20
 
@@ -94,32 +86,13 @@ export function AdminPage() {
     }
   }, [])
 
-  const fetchSettings = useCallback(async () => {
-    try {
-      const result = await api.get<AppSettings>('/admin/settings')
-      setGlobalPremium(result.globalPremiumEnabled)
-    } catch { /* ignore */ }
-  }, [])
-
-  const toggleGlobalPremium = async () => {
-    setSettingsLoading(true)
-    try {
-      const newValue = !globalPremium
-      await api.put<AppSettings>('/admin/settings', { globalPremiumEnabled: newValue })
-      setGlobalPremium(newValue)
-    } catch { /* ignore */ } finally {
-      setSettingsLoading(false)
-    }
-  }
-
   useEffect(() => {
     if (user?.role !== 'admin') {
       navigate('/dashboard')
       return
     }
     fetchUsers()
-    fetchSettings()
-  }, [user, navigate, fetchUsers, fetchSettings])
+  }, [user, navigate, fetchUsers])
 
   useEffect(() => {
     if (tab === 'revenue' && !revenue) fetchRevenue()
@@ -171,35 +144,6 @@ export function AdminPage() {
       </div>
 
       <div className="max-w-4xl mx-auto">
-        {/* Global Premium Toggle */}
-        <div
-          className="rounded-xl p-4 shadow-lg mb-6 flex items-center justify-between"
-          style={{ backgroundColor: 'var(--color-bg-card)', border: `2px solid ${globalPremium ? 'var(--color-success)' : 'var(--color-border)'}` }}
-        >
-          <div>
-            <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-              Premium cho tất cả
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-              {globalPremium ? 'Mọi phòng được 60 người chơi (unlimited)' : 'Phòng free tối đa 5 người chơi'}
-            </p>
-          </div>
-          <button
-            onClick={toggleGlobalPremium}
-            disabled={settingsLoading}
-            className="relative w-12 h-7 rounded-full transition-colors"
-            style={{
-              backgroundColor: globalPremium ? 'var(--color-success)' : 'var(--color-border)',
-              opacity: settingsLoading ? 0.5 : 1,
-            }}
-          >
-            <div
-              className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform"
-              style={{ left: globalPremium ? '22px' : '2px' }}
-            />
-          </button>
-        </div>
-
         {/* Tabs */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
           {(['users', 'revenue'] as Tab[]).map((t) => (
