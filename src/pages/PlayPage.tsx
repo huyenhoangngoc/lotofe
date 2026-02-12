@@ -410,7 +410,7 @@ export function PlayPage() {
                             const isActuallyDrawn = num !== null && drawnNumbers.includes(num)
                             const isDrawn = hideDrawnNumbers ? false : isActuallyDrawn
                             const isMarked = num !== null && markedNumbers.has(num)
-                            const isCurrent = num !== null && num === currentNumber
+                            const isCurrent = hideDrawnNumbers ? false : (num !== null && num === currentNumber)
                             const canClick = hideDrawnNumbers
                               ? (num !== null && !gameFinished)
                               : (num !== null && isActuallyDrawn && !gameFinished)
