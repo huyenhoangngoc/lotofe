@@ -13,6 +13,8 @@ interface UserItem {
   isPremium: boolean
   premiumExpiresAt: string | null
   isBanned: boolean
+  totalRoomsCreated: number
+  hasActiveRoom: boolean
 }
 
 interface PagedUsers {
@@ -227,6 +229,8 @@ export function AdminPage() {
                         <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Email</th>
                         <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Role</th>
                         <th className="text-left p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Premium</th>
+                        <th className="text-center p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Rooms</th>
+                        <th className="text-center p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Trạng thái</th>
                         <th className="text-right p-3 font-medium" style={{ color: 'var(--color-text-muted)' }}>Hành động</th>
                       </tr>
                     </thead>
@@ -258,6 +262,18 @@ export function AdminPage() {
                                 HH: {new Date(u.premiumExpiresAt).toLocaleDateString('vi-VN')}
                               </span>
                             )}
+                          </td>
+                          <td className="p-3 text-center" style={{ color: 'var(--color-text)' }}>
+                            {u.totalRoomsCreated}
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 rounded text-xs font-medium"
+                              style={{
+                                backgroundColor: u.hasActiveRoom ? 'var(--color-success)' : 'var(--color-bg)',
+                                color: u.hasActiveRoom ? 'white' : 'var(--color-text-muted)',
+                              }}>
+                              {u.hasActiveRoom ? 'Đang chơi' : 'Rảnh'}
+                            </span>
                           </td>
                           <td className="p-3 text-right">
                             {u.id !== user?.id && (
